@@ -26,7 +26,7 @@ var playerAnimation;
 // Allocate Adventure Manager with states table and interaction tables
 function preload() {
   adventureManager = new AdventureManager("data/adventureStates.csv", "data/interactionTable.csv");
-  sprite = loadAnimation('assets/1.png', 'assets/3.png');
+
 }
 
 // Setup the adventure manager
@@ -38,6 +38,7 @@ function setup() {
 
     // create a sprite 
   playerSprite = createSprite(width/2, height/2, 80, 80);
+  playerSprite.addAnimation('regular', 'assets/1.png', 'assets/3.png');
 
   // use this to track movement from toom to room in adventureManager.draw()
   adventureManager.setPlayerSprite(playerSprite);
