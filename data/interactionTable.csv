@@ -1,6 +1,9 @@
 CurrentState,KeyTyped,MapDirection,NextState
 bedroom,,E,hallway1
+bedroom,,S,toilet
+toilet,,N,bedroom
 hallway1,,W,bedroom
-hallway1,,E,hallway2
-hallway2,,S,workplace
-workplace,,N,hallway2
+hallway1,,E,livingroom
+livingroom,,W,hallway1
+livingroom,,S,kitchen
+kitchen,,N,livingroom

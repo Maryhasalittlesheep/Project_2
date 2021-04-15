@@ -1,5 +1,7 @@
 ID,StateName,ClassName,PNGFilename,CollisionFilename
 0,bedroom,PNGRoom,assets/bedroom.png,
 1,hallway1,PNGRoom,assets/hallway.png,
-2,hallway2,PNGRoom,assets/hallway2.png,
-3,workplace,PNGRoom,assets/workplace.png,
+2,livingroom,PNGRoom,assets/livingroom.png,
+3,toilet,PNGRoom,assets/toilet.png,
+4,kitchen,PNGRoom,assets/kitchen.png,
+5,workplace,PNGRoom,assets/workplace.png,
