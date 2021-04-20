@@ -1,5 +1,5 @@
-## Empty Example for P5.js
-#### by Scott Kildall
+## Mirror world
+#### by Mary Huang
 
 
 
