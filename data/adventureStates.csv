@@ -2,7 +2,7 @@ ID,StateName,ClassName,PNGFilename,CollisionFilename
 0,Splash,PNGRoom,assets/Splash.png,
 1,Instructions,PNGRoom,assets/Instructions.png,
 2,bedroom,PNGRoom,assets/rooms/bedroom.png,assets/cm/bedroom_cl.csv
-3,livingroom,PNGRoom,assets/rooms/livingroom.png,assets/cm/livingroom_cl.csv
+3,livingroom,LivingRoom,assets/rooms/livingroom.png,assets/cm/livingroom_cl.csv
 4,parentroom,PNGRoom,assets/rooms/parentroom.png,assets/cm/parentroom_cl.csv
 5,classroom,PNGRoom,assets/rooms/classroom.png,assets/cm/classroom_cl.csv
 6,gym,PNGRoom,assets/rooms/gym.png,assets/cm/gym_cl.csv
