@@ -22,7 +22,7 @@ var playerAnimation;
 var clickablesManager;    // the manager class
 var clickables;           // an array of clickable objects
 
-var npc = []
+var npcs = []
 
 // indexes into the clickable array (constants)
 const playGameIndex = 0;
@@ -43,7 +43,8 @@ function preload() {
   clickablesManager = new ClickableManager('data/clickableLayout.csv');
   adventureManager = new AdventureManager('data/adventureStates.csv', 'data/interactionTable.csv', 'data/clickableLayout.csv');
 
-  npc[0] = loadImage('assets/npc/mom.png');
+  //preload the npcs img
+  npcs[0] = loadImage('assets/npc/mom.png');
 }
  
 // Setup the adventure manager
@@ -222,17 +223,17 @@ function talkToWeirdy() {
 
 //-------------- SUBCLASSES / YOUR DRAW CODE CAN GO HERE ---------------//
 
-class livingroom extends PNGRoom {
+class LivingRoom extends PNGRoom {
   // preload is where we define OUR variables
   preload() {
 
     // NPC position
-    this.drawX = width/4;
-    this.drawY = height/2 + 100;
+    this.drawX = width/2;
+    this.drawY = height/2;
 
     //load the sprite 
     this.momNPC = createSprite(this.drawX, this.drawY, 190, 212)
-    this.momNPC.addImage(npc[0]);
+    this.momNPC.addAnimation('mom',npcs[0]);
   }
 
   // call the PNGRoom superclass's draw function to draw the background image
