@@ -1,14 +1,16 @@
 /***********************************************************************************
-  MoodyMaze
-  by Scott Kildall
+Flipping
+by Mary Huang
 
-  Uses the p5.2DAdventure.js class 
-  
-------------------------------------------------------------------------------------
-	To use:
-	Add this line to the index.html
+Overview
+This is an Social Justice topic project about Sexism in the different points of viewing in terms of male gender. 
+The game is controling Jason, the main character and going through differnt room and interact with differnt NPCs with the dialogue.
 
-  <script src="p5.2DAdventure.js"></script>
+
+Technical Details
+
+This program adding P5.Adventure.js library,P5.clickable.js library, and P5.play.js library. State mangement,State changed, and clickable items are manged through adventureStates.csv, clickableLayout.csv, and interactionTable.csv files. By using the class function to handle the changes of each subclass room load,draw functions to PNGRoom.
+
 ***********************************************************************************/
 
 // adventure manager global  
@@ -22,21 +24,15 @@ var playerAnimation;
 var clickablesManager;    // the manager class
 var clickables;           // an array of clickable objects
 
-var npcs = []
-
-// indexes into the clickable array (constants)
-const playGameIndex = 0;
-const restartGameIndex = 1;
-const answer1Index = 2;
-const answer2Index = 3;
-const answer3Index = 4;
-const answer4Index = 5;
-const answer5Index = 6;
-const answer6Index = 7;
-
-
+//npc and item img
+var npcs = [];
+var items = [];
+var trashcollecteditem = false;
+var trashnum = 0;
+// NPC talking global variables
 var talkedToWeirdNPC = false;
-
+var talkedToXNPC = false;
+var Font = null;
 
 // Allocate Adventure Manager with states table and interaction tables
 function preload() {
@@ -44,7 +40,25 @@ function preload() {
   adventureManager = new AdventureManager('data/adventureStates.csv', 'data/interactionTable.csv', 'data/clickableLayout.csv');
 
   //preload the npcs img
-  npcs[0] = loadImage('assets/npc/mom.png');
+  npcs[0] = loadImage('assets/npc/Mom.png');
+  npcs[1] = loadImage('assets/npc/Dad.png');
+  npcs[2] = loadImage('assets/npc/Classmate1.png');
+  npcs[3] = loadImage('assets/npc/Classmate2.png');
+  npcs[4] = loadImage('assets/npc/Classmate3.png');
+  npcs[5] = loadImage('assets/npc/Classmate4.png');
+  npcs[6] = loadImage('assets/npc/Teacher.png');
+  npcs[7] = loadImage('assets/npc/Coworker.png');
+  npcs[8] = loadImage('assets/npc/Coworker2.png');
+  npcs[9] = loadImage('assets/npc/Boss.png');
+
+  items[0] = loadImage('assets/item/present.png');
+  items[1] = loadImage('assets/item/Trash.png');
+  items[2] = loadImage('assets/item/Trash2.png');
+  items[3] = loadImage('assets/item/Trash3.png');
+  items[4] = loadImage('assets/item/Trash4.png');
+
+  Font = loadFont('assets/font/Pixel Emulator.otf');
+
 }
  
 // Setup the adventure manager
@@ -56,11 +70,11 @@ function setup() {
 
   // create a sprite 
   playerSprite = createSprite(width/2, height/2, 80, 80);
-  playerSprite.addAnimation('still','assets/sprite/2.png');
-  playerSprite.addAnimation('left', 'assets/sprite/4.png', 'assets/sprite/6.png');
-  playerSprite.addAnimation('right', 'assets/sprite/7.png', 'assets/sprite/9.png');
-  playerSprite.addAnimation('up', 'assets/sprite/10.png', 'assets/sprite/12.png');
-  playerSprite.addAnimation('down', 'assets/sprite/1.png', 'assets/sprite/3.png');
+  playerSprite.addAnimation('still','assets/sprite/1.png');
+  playerSprite.addAnimation('left', 'assets/sprite/Left1.png', 'assets/sprite/Left6.png');
+  playerSprite.addAnimation('right', 'assets/sprite/Right1.png', 'assets/sprite/Right6.png');
+  playerSprite.addAnimation('up', 'assets/sprite/Up1.png', 'assets/sprite/Up6.png');
+  playerSprite.addAnimation('down', 'assets/sprite/Down1.png', 'assets/sprite/Down6.png');
 
   // use this to track movement from toom to room in adventureManager.draw()
   adventureManager.setPlayerSprite(playerSprite);
@@ -76,8 +90,8 @@ function setup() {
   // call OUR function to setup additional information about the p5.clickables
   // that are not in the array 
   setupClickables(); 
-
-  //adventureManager.changeState("Aha");
+  textFont(Font);
+  noStroke();
 }
 
 // Adventure manager handles it all!
@@ -95,10 +109,15 @@ function draw() {
     // responds to keydowns
     moveSprite();
 
-
     // this is a function of p5.js, not of this sketch
     drawSprite(playerSprite);
   } 
+
+  for( let i = 1; i < clickables.length; i++ ) {
+    clickables[i].visible = false;
+  }
+
+  text("x:"+mouseX+" y:"+mouseY,40,50);
 }
 
 // pass to adventure manager, this do the draw / undraw events
@@ -166,155 +185,440 @@ function setupClickables() {
 
 // tint when mouse is over
 clickableButtonHover = function () {
-  this.color = "#AA33AA";
-  this.noTint = false;
-  this.tint = "#FF0000";
+  this.color = "#dca6eb";
+  this.noTint = true;
+
 }
 
 // color a light gray if off
 clickableButtonOnOutside = function () {
   // backto our gray color
-  this.color = "#AAAAAA";
+  this.color = "#f0dcee";
 }
 
 clickableButtonPressed = function() {
   // these clickables are ones that change your state
   // so they route to the adventure manager to do this
-   
-  if( !checkWeirdNPCButtons(this.id) ) {
-    // route to adventure manager unless you are on weird NPC screne
-    adventureManager.clickablePressed(this.name);
-  }
-
-}
-
-// this goes through and checks to see if we pressed one of the wierd NPC buttons, if so, we
-// see if it is the corrent one or not
-function checkWeirdNPCButtons(idNum) {
-  if( idNum >= 2 && idNum <= 7 ) {
-    if( idNum === 6) {
-      adventureManager.changeState("AhaOpened");
-    }
-    else {
-      die();
-    }
-
-    return true;
-  }
-
-  return false;
+   adventureManager.clickablePressed(this.name);
 }
 
 
+// code to check if NPC was talked to, if false, sets to true
 function talkToWeirdy() {
-  if( talkedToWeirdNPC === false ) {
-    print( "turning them on");
-
-    // turn on visibility for buttons
-    for( let i = answer1Index; i <= answer6Index; i++ ) {
-      clickables[i].visible = true;
+    if (talkedToWeirdNPC === false) {
+        print("turning them on1");
+        talkedToWeirdNPC = true;
+        print("talked to NPC");
     }
+}
 
-    talkedToWeirdNPC = true;
-    print("talked to weidy");
+// code to check if NPC was talked to, if false, sets to true
+function talkToNpc() {
+    if (talkedToXNPC === false) {
+        print("turning them on2");
+        talkedToXNPC = true;
+        print("talked to another NPC");
+    }
+}
+
+//collect Trash
+function Trashcollect(){
+  if (trashcollecteditem === false){
+    trashcollecteditem =true;
+    trashnum ++;
   }
 }
-  
 
 //-------------- SUBCLASSES / YOUR DRAW CODE CAN GO HERE ---------------//
 
 class LivingRoom extends PNGRoom {
   // preload is where we define OUR variables
   preload() {
+  // create npc
+    this.MomNpc = createSprite(118 ,242,48,96);
+    this.MomNpc.addImage(npcs[0]);
+    this.DadNpc = createSprite(560,238,48,96);
+    this.DadNpc.addImage(npcs[1]);
 
-    // NPC position
-    this.drawX = width/2;
-    this.drawY = height/2;
-
-    //load the sprite 
-    this.momNPC = createSprite(this.drawX, this.drawY, 190, 212)
-    this.momNPC.addAnimation('mom',npcs[0]);
+    //text functiopn 
+    this.textimg = null;
+    this.textimg2 = null;
+    talkedToWeirdNPC = false;
+    talkedToXNPC = false;
   }
 
+  load(){
+    super.load()
+
+    this.textimg = loadImage('assets/Textdialogue/livingroomtext1.png');
+    this.textimg2 = loadImage('assets/Textdialogue/livingroomtext2.png');
+  }
   // call the PNGRoom superclass's draw function to draw the background image
   // and draw our instructions on top of this
+  unload() {
+    super.unload();
+
+    this.textimg = null;
+    this.textimg2 = null;
+    talkedToWeirdNPC = false;
+    }
+
   draw() {
-    // tint down background image so text is more readable
-    tint(128);
-      
     // this calls PNGRoom.draw()
     super.draw();
       
-    drawSprite(this.momNPC)
-    // text draw settings
-    fill(255);
-    textAlign(CENTER);
-    textSize(30);
+    //draw the sprite
+    drawSprite(this.MomNpc);
+    drawSprite(this.DadNpc);
 
+    //talke with the npc
+    playerSprite.overlap(this.MomNpc,talkToWeirdy);
+    playerSprite.overlap(this.DadNpc,talkToNpc);
+
+    if (this.textimg !== null && talkedToWeirdNPC === true){
+      image(this.textimg,0,0);
+    }
+    if (this.textimg2 !== null && talkedToXNPC === true){
+      image(this.textimg2,0,0);
+    }
     }
   }
 
 
 
-class AhaRoom extends PNGRoom {
+class ParentRoom extends PNGRoom {
   // preload() gets called once upon startup
-  // We load ONE animation and create 20 NPCs
-  // 
   preload() {
-      // this is our image, we will load when we enter the room
-      this.talkBubble = null;
-      this.talkedToNPC = false;  // only draw when we run into it
-      talkedToWeirdNPC = false;
-
-      // NPC position
-      this.drawX = width/4;
-      this.drawY = height/2 + 100;
-
-      // load the animation just one time
-      this.weirdNPCSprite = createSprite( this.drawX, this.drawY, 100, 100);
-      this.weirdNPCSprite.addAnimation('regular',  loadAnimation('assets/NPCs/wierdy_01.png', 'assets/NPCs/wierdy_04.png'));
+    talkedToWeirdNPC = false;
+    talkedToXNPC = false;
+    //text functiopn 
+    this.textimg = null;
+    this.textimg2 = null;
+    // load the item
+    this.PresentSprite = createSprite(242,350, 89, 137);
+    this.PresentSprite.addImage(items[0]);
+    this.DadSitNpc = createSprite(849,425,48,96);
+    this.DadSitNpc.addImage(loadImage('assets/npc/DadSit.png'));
    }
 
-   load() {
-      // pass to superclass
-      super.load();
+  load(){
+    super.load()
 
-      this.talkBubble = loadImage('assets/talkBubble.png');
-      
-      // turn off buttons
-      for( let i = answer1Index; i <= answer6Index; i++ ) {
-       clickables[i].visible = false;
-      }
-    }
+    this.textimg = loadImage('assets/Textdialogue/parentroomtext1.png');
+    this.textimg2 = loadImage('assets/Textdialogue/parentroomtext2.png');
+  }
+  unload() {
+    super.unload();
 
-    // clears up memory
-    unload() {
-      super.unload();
-
-      this.talkBubble = null;
-      talkedToWeirdNPC = false;
-      print("unloading AHA room");
-    }
+    this.textimg = null;
+    this.textimg2 = null;
+    talkedToWeirdNPC = false;
+    talkedToXNPC = false;
+  }
 
    // pass draw function to superclass, then draw sprites, then check for overlap
   draw() {
     // PNG room draw
     super.draw();
 
-    // draws all the sprites in the group
-    //this.weirdNPCSprite.draw();
-    drawSprite(this.weirdNPCSprite)
-    // draws all the sprites in the group - 
-    //drawSprites(this.weirdNPCgroup);//.draw();
+    //this.present.draw();
+    drawSprite(this.PresentSprite)
+    drawSprite(this.DadSitNpc)
 
-    // checks for overlap with ANY sprite in the group, if this happens
+    //overlap with sprite
     // talk() function gets called
-    playerSprite.overlap(this.weirdNPCSprite, talkToWeirdy );
+    playerSprite.overlap(this.PresentSprite,talkToWeirdy);
+    playerSprite.overlap(this.DadSitNpc,talkToNpc);
 
-     
-    if( this.talkBubble !== null && talkedToWeirdNPC === true ) {
-      image(this.talkBubble, this.drawX + 60, this.drawY - 350);
+    if (this.textimg !== null && talkedToWeirdNPC === true){
+      image(this.textimg,0,0);
+    }
+    if (this.textimg2 !== null && talkedToXNPC === true){
+      image(this.textimg2,0,0);
+      clickables[1].visible = true;
     }
   }
 }
 
+class ClassRoom extends PNGRoom {
+  // preload() gets called once upon startup
+  preload() {
+    talkedToWeirdNPC = false;
+    //text functiopn 
+    this.textimg = null;
+    //laod teacher npc
+    this.TeacherNpc = createSprite(843,202,48,96);
+    this.TeacherNpc.addImage(npcs[6]);
+    this.X = 200;
+    this.Y = 334;
+   }
+  load(){
+    super.load()
+    this.textimg = loadImage('assets/Textdialogue/classroomtext1.png');
+  }
+  unload() {
+    super.unload();
+
+    this.textimg = null;
+    talkedToWeirdNPC = false;
+  }
+   // pass draw function to superclass, then draw sprites, then check for overlap
+  draw() {
+      // PNG room draw
+      super.draw();
+      //this.teacher.draw();
+      drawSprite(this.TeacherNpc)
+
+      playerSprite.overlap(this.TeacherNpc,talkToWeirdy);
+
+      if (this.textimg !== null && talkedToWeirdNPC === true){
+        image(this.textimg,0,0);
+        clickables[2].visible = true;
+        clickables[3].visible = true;
+      }
+  }
+}
+class Gym extends PNGRoom {
+  // preload is where we define OUR variables
+  preload() {
+  // create npc
+    this.Mate1Npc = createSprite(706 ,192,48,96);
+    this.Mate1Npc.addImage(npcs[2]);
+    this.Mate2Npc = createSprite(118,242,48,96);
+    this.Mate2Npc.addImage(npcs[3]);
+
+    //text functiopn 
+    this.textimg = null;
+    this.textimg2 = null;
+    talkedToWeirdNPC = false;
+    talkedToXNPC = false;
+  }
+
+  load(){
+    super.load()
+
+    this.textimg = loadImage('assets/Textdialogue/gymtext1.png');
+    this.textimg2 = loadImage('assets/Textdialogue/gymtext2.png');
+  }
+  // call the PNGRoom superclass's draw function to draw the background image
+  // and draw our instructions on top of this
+  unload() {
+    super.unload();
+
+    this.textimg = null;
+    this.textimg2 = null;
+    talkedToWeirdNPC = false;
+    talkedToXNPC = false;
+    }
+
+  draw() {
+    // this calls PNGRoom.draw()
+    super.draw();
+      
+    //draw the sprite
+    drawSprite(this.Mate1Npc);
+    drawSprite(this.Mate2Npc);
+
+    //talke with the npc
+    playerSprite.overlap(this.Mate1Npc,talkToWeirdy);
+    playerSprite.overlap(this.Mate2Npc,talkToNpc);
+
+    if (this.textimg !== null && talkedToWeirdNPC === true){
+      image(this.textimg,0,0);
+    }
+    if (this.textimg2 !== null && talkedToXNPC === true){
+      image(this.textimg2,0,0);
+    }
+    }
+}
+
+class ArtRoom extends PNGRoom {
+  // preload is where we define OUR variables
+  preload() {
+  // create npc
+    this.BoyMate = createSprite(448 ,222,48,96);
+    this.BoyMate.addImage(npcs[4]);
+    this.BoyMate2 = createSprite(744,418,48,96);
+    this.BoyMate2.addImage(npcs[5]);
+
+
+    //text functiopn 
+    this.textimg = null;
+    talkedToWeirdNPC = false
+  }
+
+  load(){
+    super.load()
+    this.textimg = loadImage('assets/Textdialogue/artroomtext1.png');
+  }
+  // call the PNGRoom superclass's draw function to draw the background image
+  // and draw our instructions on top of this
+  unload() {
+    super.unload();
+
+    this.textimg = null;
+    this.textimg2 = null;
+    talkedToWeirdNPC = false;
+    }
+
+  draw() {
+    // this calls PNGRoom.draw()
+    super.draw();
+      
+    //draw the sprite
+    drawSprite(this.BoyMate);
+    drawSprite(this.BoyMate2);
+
+    //talke with the npc
+    playerSprite.overlap(this.BoyMate,talkToWeirdy);
+
+    if (this.textimg !== null && talkedToWeirdNPC === true){
+      image(this.textimg,0,0);
+      clickables[4].visible = true;
+    }
+  }
+}    
+class Office extends PNGRoom {
+  // preload() gets called once upon startup
+  preload() {
+    talkedToWeirdNPC = false;
+    talkedToXNPC = false;
+    //text functiopn 
+    this.textimg = null;
+    this.textimg2 = null;
+    // load the npc
+    this.Femaleworker = createSprite(329 ,185,48,96);
+    this.Femaleworker.addImage(npcs[8]);
+    this.Maleworker = createSprite(188,238,48,96);
+    this.Maleworker.addImage(npcs[7]);
+   }
+
+  load(){
+    super.load()
+
+    this.textimg = loadImage('assets/Textdialogue/officetext1.png');
+    this.textimg2 = loadImage('assets/Textdialogue/officetext2.png');
+  }
+  unload() {
+    super.unload();
+
+    this.textimg = null;
+    this.textimg2 = null;
+    talkedToWeirdNPC = false;
+    talkedToXNPC = false;
+  }
+
+   // pass draw function to superclass, then draw sprites, then check for overlap
+  draw() {
+    // PNG room draw
+    super.draw();
+
+    //this.present.draw();
+    drawSprite(this.Femaleworker)
+    drawSprite(this.Maleworker)
+
+    //overlap with sprite
+    // talk() function gets called
+    playerSprite.overlap(this.Femaleworker,talkToWeirdy);
+    playerSprite.overlap(this.Maleworker,talkToNpc);
+
+    if (this.textimg !== null && talkedToWeirdNPC === true){
+      image(this.textimg,0,0);
+    }
+    if (this.textimg2 !== null && talkedToXNPC === true){
+      image(this.textimg2,0,0);
+      clickables[5].visible = true;
+    }
+  }
+}
+  class BossOffice extends PNGRoom {
+  // preload() gets called once upon startup
+  preload() {
+    talkedToWeirdNPC = false;
+    //text functiopn 
+    this.textimg = null;
+    //laod boss npc
+    this.Boss = createSprite(516,184,48,96);
+    this.Boss.addImage(npcs[9]);
+   }
+  load(){
+    super.load()
+    this.textimg = loadImage('assets/Textdialogue/bosstext1.png');
+  }
+  unload() {
+    super.unload();
+
+    this.textimg = null;
+    talkedToWeirdNPC = false;
+  }
+   // pass draw function to superclass, then draw sprites, then check for overlap
+  draw() {
+      // PNG room draw
+      super.draw();
+      //this.teacher.draw();
+      drawSprite(this.Boss)
+
+      playerSprite.overlap(this.Boss,talkToWeirdy);
+
+      if (this.textimg !== null && talkedToWeirdNPC === true){
+        image(this.textimg,0,0);
+      }
+   }
+  }
+
+class OfficewT extends PNGRoom {
+  // preload is where we define OUR variables
+  preload() {
+    //
+    trashcollecteditem = false;
+    //load Trashs sprite 
+    this.Trash1 = createSprite(132, 362, 43, 39)
+    this.Trash1.addImage(items[1]);
+    this.Trash2 = createSprite(404, 325, 32, 31)
+    this.Trash2.addImage(items[2]);
+    this.Trash3 = createSprite(670, 439, 70, 40)
+    this.Trash3.addImage(items[3]);
+    this.Trash4 = createSprite(703, 206, 42, 38)
+    this.Trash4.addImage(items[4]);
+  }
+
+  // call the PNGRoom superclass's draw function to draw the background image
+  // and draw our instructions on top of this
+  draw() {
+    // this calls PNGRoom.draw()
+    super.draw();
+    //draw the sprite
+    drawSprite(this.Trash1)
+    drawSprite(this.Trash2)
+    drawSprite(this.Trash3)
+    drawSprite(this.Trash4)
+
+    //talke with the npc
+    if (playerSprite.overlap(this.Trash1,Trashcollect)){
+      this.Trash1.visible = false;
+      trashcollecteditem = false;
+    }
+    if (playerSprite.overlap(this.Trash2,Trashcollect)){
+      this.Trash2.visible = false;
+      trashcollecteditem = false;
+    }
+    if (playerSprite.overlap(this.Trash3,Trashcollect)){
+      this.Trash3.visible = false;
+      trashcollecteditem = false;
+    }
+    if (playerSprite.overlap(this.Trash4,Trashcollect)){
+      this.Trash4.visible = false;
+
+    }
+
+    if (trashnum >= 4){
+      adventureManager.changeState("End");
+    }
+    // text draw settings
+    fill(0);
+    textAlign(CENTER);
+    textSize(20);
+
+    text("Trash cleaned: "+trashnum,169,584);
+    }
+  }

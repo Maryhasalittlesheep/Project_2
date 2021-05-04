@@ -1,9 +1,9 @@
 ID,Name,State,PNGFilename,Text,x,y,width,height
 0,StartGame,Instructions,,Start Game,100,650,100,50
-1,Restart,Dead,,Restart Game,100,650,100,50
-2,Answer1,,,1. All of the Below,50,600,150,50
-3,Answer2,,,2. None of the Below,225,600,150,50
-4,Answer3,,,3. All of the Above,400,600,150,50
-5,Answer4,,,4. One of the Above,575,600,150,50
-6,Answer5,,,5. None of the Above,750,600,150,50
-7,Answer6,,,6. None of the Above,925,600,150,50
+1,NextStage,parentroom,,Next Event,768,640,80,50
+2,ArtRoom,classroom,,ArtRoom,768,590,80,50
+3,Gym,classroom,,Gym,768,650,80,50
+4,NextStage2,artroom,,Next Event,768,640,100,50
+5,BossOffice,office,,Boss Office,768,640,100,50
+6,,,,,,,,
+7,,,,,,,,
